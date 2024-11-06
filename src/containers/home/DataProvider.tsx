@@ -2,15 +2,15 @@ import React, { createContext, useContext, useState } from "react";
 
 const initialValues = {
   requisitionDetails: {
-    gender: "",
-    noOfOpenings: 0,
     requisitionTitle: "",
+    noOfOpenings: 0,
     urgency: "",
+    gender: "",
   },
   jobDetails: {
+    jobTitle: "",
     jobDetails: "",
     jobLocation: "",
-    jobTitle: "",
   },
   interviewSettings: {
     interviewDuration: "",
@@ -37,7 +37,9 @@ const DataProvider: React.FC<{ children: React.ReactNode }> = ({
 };
 
 export const useData = () => {
-  return useContext(DataContext);
+  const context = useContext(DataContext);
+  if (!context) throw new Error("useData must be used within DataProvider");
+  return context;
 };
 
 export default DataProvider;

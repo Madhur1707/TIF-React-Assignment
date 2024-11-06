@@ -7,26 +7,19 @@ import * as Yup from "yup";
 import { PageNumbers } from "../../interface/home";
 import { IRequisitionDetails } from "../../interface/forms";
 import { genderOptions, urgencyOptions } from "./constants";
+import { useData } from "./DataProvider";
 
 const RequisitionDetailsForm: React.FC<{
   handleTab: (n: PageNumbers) => void;
 }> = ({ handleTab }) => {
-  const {
-    handleChange,
-    errors,
-    touched,
-    handleBlur,
-    handleSubmit,
-    values,
-    setFieldTouched,
-    setFieldValue,
-    isValid,
-  } = useFormik<IRequisitionDetails>({
+  const { state, setState } = useData();
+
+  const formik = useFormik<IRequisitionDetails>({
     initialValues: {
-      requisitionTitle: "",
-      noOfOpenings: 0,
-      urgency: "",
-      gender: "",
+      requisitionTitle: state.requisitionDetails?.requisitionTitle || "",
+      noOfOpenings: state.requisitionDetails?.noOfOpenings || 0,
+      urgency: state.requisitionDetails?.urgency || "",
+      gender: state.requisitionDetails?.gender || "",
     },
     validationSchema: Yup.object().shape({
       requisitionTitle: Yup.string().required("Requisition title is required"),
@@ -39,54 +32,81 @@ const RequisitionDetailsForm: React.FC<{
       gender: Yup.string().required("Gender is required"),
     }),
     onSubmit: (values) => {
+      setState((prevState) => ({
+        ...prevState,
+        requisitionDetails: values,
+      }));
       handleTab(1);
     },
   });
+  const handleFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement> | null,
+    fieldName?: string,
+    fieldValue?: string
+  ) => {
+    const updatedValue = fieldValue || (e ? e.target.value : undefined);
+    const updatedFieldName = fieldName || (e ? e.target.name : undefined);
+
+    if (updatedFieldName && updatedValue) {
+      formik.setFieldValue(updatedFieldName, updatedValue);
+      setState((prevState) => ({
+        ...prevState,
+        requisitionDetails: {
+          ...prevState.requisitionDetails,
+          [updatedFieldName]: updatedValue,
+        },
+      }));
+    }
+  };
 
   return (
-    <Box width="100%" as="form" onSubmit={handleSubmit as any}>
+    <Box width="100%" as="form" onSubmit={formik.handleSubmit as any}>
       <Box width="100%">
         <FormInput
           label="Requisition Title"
           placeholder="Enter requisition title"
           name="requisitionTitle"
-          onChange={handleChange}
-          onBlur={handleBlur}
-          value={values?.requisitionTitle}
-          error={errors?.requisitionTitle}
-          touched={touched?.requisitionTitle}
+          onChange={handleFieldChange}
+          onBlur={formik.handleBlur}
+          value={formik.values.requisitionTitle}
+          error={formik.errors.requisitionTitle}
+          touched={formik.touched.requisitionTitle}
         />
         <FormInput
           label="Number of openings"
           placeholder="Enter number of openings"
           name="noOfOpenings"
-          onChange={handleChange}
-          onBlur={handleBlur}
-          value={values?.noOfOpenings}
-          error={errors?.noOfOpenings}
-          touched={touched?.noOfOpenings}
+          onChange={handleFieldChange}
+          onBlur={formik.handleBlur}
+          value={formik.values.noOfOpenings}
+          error={formik.errors.noOfOpenings}
+          touched={formik.touched.noOfOpenings}
         />
         <FormSelect
           label="Gender"
           name="gender"
           placeholder="Select gender"
           options={genderOptions}
-          onChange={setFieldValue}
-          onBlur={setFieldTouched}
-          error={errors.gender}
-          touched={touched.gender}
-          value={values.gender}
+          onChange={(fieldName: string, fieldValue: string) => {
+            handleFieldChange(null, fieldName, fieldValue);
+          }}
+          onBlur={() => formik.setFieldTouched("gender", true)}
+          error={formik.errors.gender}
+          touched={formik.touched.gender}
+          value={formik.values.gender}
         />
         <FormSelect
           label="Urgency"
           name="urgency"
           placeholder="Select urgency"
           options={urgencyOptions}
-          onChange={setFieldValue}
-          onBlur={setFieldTouched}
-          error={errors.urgency}
-          touched={touched.urgency}
-          value={values.urgency}
+          onChange={(fieldName: string, fieldValue: string) => {
+            handleFieldChange(null, fieldName, fieldValue);
+          }}
+          onBlur={() => formik.setFieldTouched("urgency", true)}
+          error={formik.errors.urgency}
+          touched={formik.touched.urgency}
+          value={formik.values.urgency}
         />
         <Flex w="100%" justify="flex-end" mt="4rem">
           <Button colorScheme="red" type="submit">

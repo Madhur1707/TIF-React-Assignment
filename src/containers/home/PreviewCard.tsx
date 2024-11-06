@@ -1,17 +1,13 @@
 import { Box, Flex, Text, Grid } from "@chakra-ui/react";
 import React from "react";
 import {
-  IInterViewSettings,
-  IJobDetails,
-  IRequisitionDetails,
-} from "../../interface/forms";
-import {
   genderOptions,
   interviewDurationOptions,
   interviewLanguageOptions,
   interviewModeOptions,
   urgencyOptions,
 } from "./constants";
+import { useData } from "./DataProvider";
 
 const DataCard: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
@@ -29,10 +25,10 @@ const DataCard: React.FC<{ title: string; children: React.ReactNode }> = ({
   );
 };
 
-const KeyValue: React.FC<{
-  title: string;
-  value?: string;
-}> = ({ title, value }) => {
+const KeyValue: React.FC<{ title: string; value?: string }> = ({
+  title,
+  value,
+}) => {
   return (
     <Box w="100%">
       <Text fontSize=".875rem" color="gray" mb="8px">
@@ -45,11 +41,11 @@ const KeyValue: React.FC<{
   );
 };
 
-const PreviewCard: React.FC<{
-  requisitionDetails?: IRequisitionDetails;
-  jobDetails?: IJobDetails;
-  interviewSettings?: IInterViewSettings;
-}> = ({ requisitionDetails, jobDetails, interviewSettings }) => {
+const PreviewCard: React.FC = () => {
+  const { state } = useData(); // Access context state
+
+  const { requisitionDetails, jobDetails, interviewSettings } = state;
+
   return (
     <Box p="1rem">
       <Box borderRadius="10px" bgColor="gray.100" height="fit-content">
